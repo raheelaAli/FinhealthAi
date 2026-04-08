@@ -26,58 +26,15 @@ you sleep under 6 hours").
 
 ## Tech Stack (100% free)
 
-| Layer | Technology | Cost |
+| Layer | Technology 
 |---|---|---|
-| Frontend + API | Next.js 14 App Router | Free |
-| Database | PostgreSQL via Neon | Free (0.5 GB) |
-| ORM | Prisma | Free |
-| Auth | NextAuth.js | Free |
-| AI | Google Gemini 1.5 Flash | Free (1500 req/day) |
-| Styling | Tailwind CSS | Free |
-| Hosting | Vercel Hobby | Free |
-
----
-
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── auth/
-│   │   ├── login/page.tsx
-│   │   └── register/page.tsx
-│   ├── dashboard/
-│   │   ├── layout.tsx          # Sidebar nav, auth guard
-│   │   ├── page.tsx            # Overview with stats
-│   │   ├── finance/page.tsx    # Transactions + budgets
-│   │   ├── health/page.tsx     # Health logs + charts
-│   │   ├── ai/page.tsx         # AI chat with streaming
-│   │   ├── goals/page.tsx      # Goals tracker
-│   │   ├── alerts/page.tsx     # Real-time alerts
-│   │   └── admin/page.tsx      # Admin panel (role-gated)
-│   └── api/
-│       ├── auth/               # NextAuth + register
-│       ├── transactions/       # CRUD routes
-│       ├── health/             # Health log routes
-│       ├── ai/route.ts         # Streaming AI endpoint
-│       └── alerts/sse/route.ts # Server-Sent Events
-├── components/
-│   ├── ui/                     # Button, Input, Card, etc.
-│   ├── dashboard/              # SideNav, StatCard
-│   ├── finance/                # TransactionForm, BudgetBar
-│   ├── health/                 # HealthForm, TrendChart
-│   └── ai/                     # AIChat, StreamingResponse
-├── lib/
-│   ├── prisma.ts               # Prisma singleton
-│   ├── auth.ts                 # NextAuth config
-│   ├── auth-helpers.ts         # requireAuth, requireAdmin
-│   └── gemini.ts               # Gemini AI wrapper
-└── types/
-    └── next-auth.d.ts          # Extended session types
-prisma/
-├── schema.prisma               # Full data model
-└── seed.ts                     # Demo data
-```
+| Frontend + API | Next.js 14 App Router | 
+| Database | PostgreSQL via Neon | 
+| ORM | Prisma |
+| Auth | NextAuth.js |
+| AI | Google Gemini 1.5 Flash |
+| Styling | Tailwind CSS | 
+| Hosting | Vercel Hobby | 
 
 ---
 
@@ -128,20 +85,7 @@ Visit [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## Deploying to Vercel (free)
 
-```bash
-npm i -g vercel
-vercel
-```
-
-Add environment variables in the Vercel dashboard:
-- `DATABASE_URL`
-- `NEXTAUTH_SECRET`
-- `NEXTAUTH_URL` → your Vercel URL
-- `GEMINI_API_KEY`
-
----
 
 ## Data Models
 
@@ -156,17 +100,3 @@ User ──< Alert         (real-time notifications)
 
 ---
 
-## 10-Day Build Plan
-
-| Day | Focus |
-|---|---|
-| 1–2 | ✅ Project scaffold, Prisma schema, NextAuth, seed data |
-| 3–4 | Finance module — transactions, budgets, real-time alerts |
-| 5–6 | Health module — logs, charts, goal tracking |
-| 7–8 | AI module — Gemini streaming, combined insights |
-| 9–10 | Polish, admin panel, README, deploy |
-
----
-
-## License
-MIT
