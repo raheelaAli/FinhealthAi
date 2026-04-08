@@ -27,7 +27,7 @@ you sleep under 6 hours").
 ## Tech Stack (100% free)
 
 | Layer | Technology 
-|---|---|---|
+|---|---|
 | Frontend + API | Next.js 14 App Router | 
 | Database | PostgreSQL via Neon | 
 | ORM | Prisma |
