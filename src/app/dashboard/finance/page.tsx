@@ -17,9 +17,7 @@ interface BudgetUsage {
   category: string; limit: number; spent: number; pct: number;
 }
 
-function fmt(n: number) {
-  return "₨" + n.toLocaleString("en-PK", { maximumFractionDigits: 0 });
-}
+function fmt(n: number) { return "₨" + n.toLocaleString("en-PK", { maximumFractionDigits: 0 }); }
 
 export default function FinancePage() {
   const { refresh: refreshAlerts } = useAlerts();
@@ -29,10 +27,7 @@ export default function FinancePage() {
   const [tab,          setTab]          = useState<"all" | "income" | "expense">("all");
 
   const loadData = useCallback(async () => {
-    const [txRes, bRes] = await Promise.all([
-      fetch("/api/transactions"),
-      fetch("/api/budgets"),
-    ]);
+    const [txRes, bRes] = await Promise.all([fetch("/api/transactions"), fetch("/api/budgets")]);
     const txData = await txRes.json();
     const bData  = await bRes.json();
     const txs: Transaction[] = txData.transactions ?? [];
@@ -45,8 +40,7 @@ export default function FinancePage() {
        .forEach(t => { spent[t.category] = (spent[t.category] ?? 0) + t.amount; });
 
     const usage: BudgetUsage[] = (bData.budgets ?? []).map((b: any) => ({
-      category: b.category,
-      limit:    b.limit,
+      category: b.category, limit: b.limit,
       spent:    spent[b.category] ?? 0,
       pct:      Math.min(100, Math.round(((spent[b.category] ?? 0) / b.limit) * 100)),
     }));
@@ -58,19 +52,18 @@ export default function FinancePage() {
 
   async function handleTransactionAdded() {
     await loadData();
-    // Finance alerts fire async on server — wait 1.5s then check for new alerts
-    setTimeout(() => refreshAlerts(), 1500);
-    setTimeout(() => refreshAlerts(), 4000); // double-check
+    await refreshAlerts(); // refresh alerts after add — picks up any budget alerts
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
     setTransactions(prev => prev.filter(t => t.id !== id));
+    await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+    await loadData(); // recalculate budget bars after delete
   }
 
-  const income   = transactions.filter(t => t.type === "INCOME").reduce((s, t) => s + t.amount, 0);
+  const income   = transactions.filter(t => t.type === "INCOME" ).reduce((s, t) => s + t.amount, 0);
   const expenses = transactions.filter(t => t.type === "EXPENSE").reduce((s, t) => s + t.amount, 0);
-  const filtered = tab === "all" ? transactions
-    : transactions.filter(t => t.type === tab.toUpperCase());
+  const filtered = tab === "all" ? transactions : transactions.filter(t => t.type === tab.toUpperCase());
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
@@ -87,9 +80,9 @@ export default function FinancePage() {
 
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Income",     value: fmt(income),          color: "text-emerald-600" },
-          { label: "Expenses",   value: fmt(expenses),        color: "text-red-500"     },
-          { label: "Net savings",value: fmt(income-expenses), color: income-expenses >= 0 ? "text-emerald-600" : "text-red-500" },
+          { label: "Income",    value: fmt(income),           color: "text-emerald-600" },
+          { label: "Expenses",  value: fmt(expenses),         color: "text-red-500"     },
+          { label: "Net savings", value: fmt(income-expenses), color: income-expenses >= 0 ? "text-emerald-600" : "text-red-500" },
         ].map(c => (
           <div key={c.label} className="bg-white rounded-xl border border-gray-200 p-5">
             <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">{c.label}</p>
@@ -119,7 +112,7 @@ export default function FinancePage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-gray-900">Transactions</h2>
               <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
-                {(["all","income","expense"] as const).map(t => (
+                {(["all", "income", "expense"] as const).map(t => (
                   <button key={t} onClick={() => setTab(t)}
                     className={`px-3 py-1 text-xs font-medium rounded-md transition-colors capitalize ${
                       tab === t ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"

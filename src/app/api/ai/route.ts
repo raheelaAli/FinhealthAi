@@ -7,9 +7,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { checkAiLimit } from "@/lib/auth-helpers";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+
+
 
 const SYSTEM_PROMPT = `You are FinHealth AI, a personal finance and health advisor.
 Analyze the user's data and provide warm, specific, actionable insights.
@@ -46,44 +46,59 @@ export async function POST(req: NextRequest) {
     return new Response(JSON.stringify({ error: "Prompt is required" }), { status: 400 });
   }
 
-  // Gather user's last 30 days of data for context
+  // ===== Gather last 30 days of user data =====
   const userId = session.user.id;
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
   const [transactions, healthLogs, budgets, goals] = await Promise.all([
     prisma.transaction.findMany({
-      where:   { userId, date: { gte: thirtyDaysAgo } },
+      where: { userId, date: { gte: thirtyDaysAgo } },
       orderBy: { date: "desc" },
-      take:    50,
+      take: 50,
     }),
     prisma.healthLog.findMany({
-      where:   { userId, date: { gte: thirtyDaysAgo } },
+      where: { userId, date: { gte: thirtyDaysAgo } },
       orderBy: { date: "desc" },
     }),
     prisma.budget.findMany({ where: { userId } }),
     prisma.goal.findMany({ where: { userId } }),
   ]);
 
-  // Build a rich context string for Gemini
-  const totalIncome   = transactions.filter(t => t.type === "INCOME").reduce((s, t) => s + t.amount, 0);
+  // ===== Calculations =====
+  const totalIncome = transactions.filter(t => t.type === "INCOME").reduce((s, t) => s + t.amount, 0);
   const totalExpenses = transactions.filter(t => t.type === "EXPENSE").reduce((s, t) => s + t.amount, 0);
 
   const spendByCategory: Record<string, number> = {};
   transactions
     .filter(t => t.type === "EXPENSE")
-    .forEach(t => { spendByCategory[t.category] = (spendByCategory[t.category] ?? 0) + t.amount; });
+    .forEach(t => {
+      spendByCategory[t.category] = (spendByCategory[t.category] ?? 0) + t.amount;
+    });
 
-  const avgSteps    = healthLogs.length ? healthLogs.reduce((s, l) => s + (l.steps ?? 0), 0)    / healthLogs.length : 0;
-  const avgSleep    = healthLogs.length ? healthLogs.reduce((s, l) => s + (l.sleepHrs ?? 0), 0) / healthLogs.length : 0;
-  const avgMood     = healthLogs.length ? healthLogs.reduce((s, l) => s + (l.mood ?? 0), 0)     / healthLogs.length : 0;
+  const avgSteps = healthLogs.length
+    ? healthLogs.reduce((s, l) => s + (l.steps ?? 0), 0) / healthLogs.length
+    : 0;
+  const avgSleep = healthLogs.length
+    ? healthLogs.reduce((s, l) => s + (l.sleepHrs ?? 0), 0) / healthLogs.length
+    : 0;
+  const avgMood = healthLogs.length
+    ? healthLogs.reduce((s, l) => s + (l.mood ?? 0), 0) / healthLogs.length
+    : 0;
 
-  // Cross-domain correlation: spending on low-sleep days
-  const lowSleepDays  = healthLogs.filter(l => (l.sleepHrs ?? 8) < 6).map(l => l.date.toISOString().split("T")[0]);
+  const lowSleepDays = healthLogs
+    .filter(l => (l.sleepHrs ?? 8) < 6)
+    .map(l => l.date.toISOString().slice(0, 10));
+
   const lowSleepSpend = transactions
-    .filter(t => t.type === "EXPENSE" && lowSleepDays.includes(new Date(t.date).toISOString().split("T")[0]))
+    .filter(
+      t =>
+        t.type === "EXPENSE" &&
+        lowSleepDays.includes(new Date(t.date).toISOString().slice(0, 10))
+    )
     .reduce((s, t) => s + t.amount, 0);
 
+  // ===== Build context =====
   const context = `
 USER DATA — Last 30 days:
 
@@ -105,52 +120,55 @@ HEALTH:
 GOALS:
 ${goals.map(g => `- ${g.title}: ${g.current}/${g.target} ${g.unit} (${g.achieved ? "achieved" : "in progress"})`).join("\n")}
 
-USER QUESTION: ${prompt}`;
+USER QUESTION: ${prompt}
+`;
 
-  // Stream Gemini response
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  // ===== Call Groq API =====
+  try {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "llama-3.1-8b-instant", // free & stable for demos
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: context },
+        ],
+      }),
+    });
 
-  let fullResponse = "";
+    if (!response.ok) {
+      const err = await response.text();
+      console.error("Groq error:", err);
+      return new Response("AI error", { status: 500 });
+    }
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      try {
-        const result = await model.generateContentStream(
-          `${SYSTEM_PROMPT}\n\n${context}`
-        );
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content || "No response";
 
-        for await (const chunk of result.stream) {
-          const text = chunk.text();
-          fullResponse += text;
-          controller.enqueue(new TextEncoder().encode(text));
-        }
+    // ===== Save AI response to DB =====
+    await prisma.aiInsight.create({
+      data: {
+        userId,
+        prompt,
+        response: text,
+        type: "combined",
+      },
+    });
 
-        // Save the complete insight to DB after streaming
-        await prisma.aiInsight.create({
-          data: {
-            userId,
-            prompt,
-            response: fullResponse,
-            type:     "combined",
-          },
-        });
+    // ===== Return to client =====
+    return new Response(text, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "X-Remaining": String(remaining - 1),
+      },
+    });
 
-        controller.close();
-      } catch (err) {
-        console.error("Gemini error:", err);
-        controller.enqueue(
-          new TextEncoder().encode("\n\n*Error generating insight. Please try again.*")
-        );
-        controller.close();
-      }
-    },
-  });
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type":  "text/plain; charset=utf-8",
-      "X-Remaining":   String(remaining - 1),
-      "Cache-Control": "no-cache",
-    },
-  });
+  } catch (err) {
+    console.error("AI error:", err);
+    return new Response("Error generating insight", { status: 500 });
+  }
 }

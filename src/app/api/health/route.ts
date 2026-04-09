@@ -50,19 +50,12 @@ export async function POST(req: NextRequest) {
     });
 
     const log = existing
-      ? await prisma.healthLog.update({
-          where: { id: existing.id },
-          data:  { ...data, date: new Date(data.date) },
-        })
-      : await prisma.healthLog.create({
-          data: { userId: session.user.id, ...data, date: new Date(data.date) },
-        });
+      ? await prisma.healthLog.update({ where: { id: existing.id }, data: { ...data, date: new Date(data.date) } })
+      : await prisma.healthLog.create({ data: { userId: session.user.id, ...data, date: new Date(data.date) } });
 
-    // Fire alerts in background
-    (async () => {
-      await checkHealthGoalAlerts(session.user.id, data);
-      await checkStreakAlert(session.user.id);
-    })();
+    // FIXED: await alerts directly
+    await checkHealthGoalAlerts(session.user.id, data);
+    await checkStreakAlert(session.user.id);
 
     return NextResponse.json({ log }, { status: 201 });
   } catch (error) {

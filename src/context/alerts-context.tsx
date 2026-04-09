@@ -1,5 +1,7 @@
 "use client";
 // src/context/alerts-context.tsx
+// Single source of truth for alerts — shared between AlertToast, AlertsPage, and SideNav badge
+// Without this, each component creates its own SSE connection and state — they go out of sync
 
 import {
   createContext, useContext, useEffect,
@@ -15,60 +17,35 @@ export interface Alert {
 }
 
 interface AlertsContextValue {
-  alerts:       Alert[];
-  unreadCount:  number;
-  toast:        Alert | null;
-  markAllRead:  () => Promise<void>;
-  dismissToast: () => void;
-  refresh:      () => Promise<void>;
+  alerts:      Alert[];
+  unreadCount: number;
+  toast:       Alert | null;
+  markAllRead: () => Promise<void>;
+  dismissToast:() => void;
+  refresh:     () => Promise<void>;
 }
 
 const AlertsContext = createContext<AlertsContextValue | null>(null);
 
 export function AlertsProvider({ children }: { children: ReactNode }) {
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [toast,  setToast]  = useState<Alert | null>(null);
-  const knownIds            = useRef<Set<string>>(new Set());
+  const [alerts,      setAlerts]      = useState<Alert[]>([]);
+  const [toast,       setToast]       = useState<Alert | null>(null);
+  const lastChecked                   = useRef(new Date());
 
   const unreadCount = alerts.filter(a => !a.read).length;
 
+  // Load all alerts from DB on mount
   const refresh = useCallback(async () => {
     try {
       const res  = await fetch("/api/alerts");
       const data = await res.json();
-      const fresh: Alert[] = data.alerts ?? [];
-
-      // Find truly new alerts (not seen before) and show as toast
-      const newOnes = fresh.filter(a => !knownIds.current.has(a.id) && !a.read);
-      fresh.forEach(a => knownIds.current.add(a.id));
-
-      setAlerts(fresh);
-
-      if (newOnes.length > 0) {
-        // Show each new alert as toast with stagger
-        newOnes.forEach((alert, i) => {
-          setTimeout(() => {
-            setToast(alert);
-            setTimeout(() => setToast(null), 5000);
-          }, i * 600);
-        });
-      }
+      setAlerts(data.alerts ?? []);
     } catch {}
   }, []);
 
-  // Initial load — mark existing as known (don't toast on load)
-  useEffect(() => {
-    fetch("/api/alerts")
-      .then(r => r.json())
-      .then(data => {
-        const existing: Alert[] = data.alerts ?? [];
-        existing.forEach(a => knownIds.current.add(a.id));
-        setAlerts(existing);
-      })
-      .catch(() => {});
-  }, []);
+  useEffect(() => { refresh(); }, [refresh]);
 
-  // SSE for real-time — when alert arrives via SSE, refresh after short delay
+  // SSE connection — one connection for the whole app
   useEffect(() => {
     const es = new EventSource("/api/alerts/sse");
 
@@ -76,21 +53,22 @@ export function AlertsProvider({ children }: { children: ReactNode }) {
       try {
         const data = JSON.parse(event.data);
         if (data.type === "alert") {
-          // Small delay ensures DB write is fully committed before we read
-          setTimeout(() => refresh(), 300);
+          const newAlert: Alert = data.alert;
+          setAlerts(prev => {
+            // avoid duplicates
+            if (prev.find(a => a.id === newAlert.id)) return prev;
+            return [newAlert, ...prev];
+          });
+          setToast(newAlert);
+          lastChecked.current = new Date();
+          setTimeout(() => setToast(null), 5000);
         }
       } catch {}
     };
 
-    es.onerror = () => { es.close(); };
+    es.onerror = () => es.close();
     return () => es.close();
-  }, [refresh]);
-
-  // Also poll every 8s as fallback (catches finance alerts that fire async)
-  useEffect(() => {
-    const id = setInterval(() => refresh(), 8000);
-    return () => clearInterval(id);
-  }, [refresh]);
+  }, []);
 
   const markAllRead = useCallback(async () => {
     await fetch("/api/alerts", { method: "PATCH" });
@@ -100,7 +78,10 @@ export function AlertsProvider({ children }: { children: ReactNode }) {
   const dismissToast = useCallback(() => setToast(null), []);
 
   return (
-    <AlertsContext.Provider value={{ alerts, unreadCount, toast, markAllRead, dismissToast, refresh }}>
+    <AlertsContext.Provider value={{
+      alerts, unreadCount, toast,
+      markAllRead, dismissToast, refresh,
+    }}>
       {children}
     </AlertsContext.Provider>
   );

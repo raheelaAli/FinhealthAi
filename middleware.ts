@@ -1,7 +1,6 @@
-// middleware.ts  (must be in project ROOT, not inside src)
-// Runs on every request — redirects:
-//   - Logged-in users away from /auth/* → /dashboard
-//   - Logged-out users away from /dashboard/* → /auth/login
+// middleware.ts  (goes in project ROOT, not inside src/)
+// Protects /dashboard routes — redirects to login if not authenticated
+// Redirects already-logged-in users away from /auth pages to /dashboard
 
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
@@ -11,8 +10,13 @@ export default withAuth(
     const { pathname } = req.nextUrl;
     const token = req.nextauth.token;
 
-    // If logged in and trying to visit auth pages → redirect to dashboard
+    // If logged in and trying to access auth pages → redirect to dashboard
     if (token && (pathname.startsWith("/auth/login") || pathname.startsWith("/auth/register"))) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+
+    // Admin-only route guard
+    if (pathname.startsWith("/dashboard/admin") && token?.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
@@ -20,12 +24,13 @@ export default withAuth(
   },
   {
     callbacks: {
-      // Only run middleware logic on auth pages + dashboard
-      authorized({ req, token }) {
+      // Only run middleware on protected routes
+      authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl;
-        // Dashboard requires auth
+        // Auth pages are always accessible
+        if (pathname.startsWith("/auth/") || pathname === "/") return true;
+        // Everything under /dashboard requires a token
         if (pathname.startsWith("/dashboard")) return !!token;
-        // Auth pages and everything else — always allow (middleware fn handles redirect)
         return true;
       },
     },
@@ -33,5 +38,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/auth/login", "/auth/register"],
+  matcher: ["/dashboard/:path*", "/auth/:path*"],
 };

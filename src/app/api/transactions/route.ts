@@ -30,12 +30,10 @@ export async function GET(req: NextRequest) {
       userId: session.user.id,
       ...(category && { category }),
       ...(type && { type }),
-      ...(from || to ? {
-        date: {
-          ...(from && { gte: new Date(from) }),
-          ...(to   && { lte: new Date(to)   }),
-        },
-      } : {}),
+      ...(from || to ? { date: {
+        ...(from && { gte: new Date(from) }),
+        ...(to   && { lte: new Date(to)   }),
+      }} : {}),
     },
     orderBy: { date: "desc" },
   });
@@ -62,16 +60,14 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Fire alerts in background — don't block response
-    (async () => {
-      if (data.type === TransactionType.EXPENSE) {
-        await checkBudgetAlert(session.user.id, data.category);
-        await checkFinanceGoalAlerts(session.user.id);
-      }
-      if (data.type === TransactionType.INCOME) {
-        await checkIncomeAlert(session.user.id, data.amount);
-      }
-    })();
+    // FIXED: await alerts directly — fire-and-forget IIFE gets killed on serverless
+    if (data.type === TransactionType.EXPENSE) {
+      await checkBudgetAlert(session.user.id, data.category);
+      await checkFinanceGoalAlerts(session.user.id);
+    }
+    if (data.type === TransactionType.INCOME) {
+      await checkIncomeAlert(session.user.id, data.amount);
+    }
 
     return NextResponse.json({ transaction }, { status: 201 });
   } catch (error) {
