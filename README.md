@@ -1,6 +1,6 @@
 # FinHealth AI 🌿
 
-> AI-powered personal finance & health insights platform built with Next.js 14, Prisma, and Google Gemini.
+> AI-powered personal finance & health insights platform built with Next.js 14, Prisma, and GROQ.
 
 **Live Demo:** [finhealth-ai.vercel.app](https://finhealth-ai.vercel.app)
 **Demo login:** `demo@finhealth.app` / `Demo1234!`
@@ -19,7 +19,7 @@ you sleep under 6 hours").
 - **Finance tracking** — Log transactions, set budgets by category, track spending trends
 - **Health logging** — Daily steps, sleep, water, mood, weight with 30-day charts
 - **Real-time alerts** — SSE-powered budget warnings and goal milestone notifications
-- **AI insights** — Google Gemini analyzes your combined finance + health data with streaming responses
+- **AI insights** — GROQ analyzes your combined finance + health data with streaming responses
 - **Admin panel** — Usage stats, user management (admin role only)
 
 ---
