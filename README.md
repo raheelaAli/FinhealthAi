@@ -32,7 +32,7 @@ you sleep under 6 hours").
 | Database | PostgreSQL via Neon | 
 | ORM | Prisma |
 | Auth | NextAuth.js |
-| AI | Google Gemini 1.5 Flash |
+| AI | GROQ MOdel llama-3.1-8b-instant |
 | Styling | Tailwind CSS | 
 | Hosting | Vercel Hobby | 
 
@@ -52,8 +52,8 @@ npm install
 2. Create a new project
 3. Copy the **connection string** (looks like `postgresql://...`)
 
-### 3. Get Gemini API key (free)
-1. Go to [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)
+### 3. Get GROQ_API_KEY API key (free)
+1. Go to [aistudio.google.com/app/apikey](https://console.groq.com/keys)
 2. Click **Create API key**
 3. Copy the key
 
@@ -66,7 +66,7 @@ Edit `.env.local` and fill in:
 DATABASE_URL="your-neon-connection-string"
 NEXTAUTH_SECRET="run: openssl rand -base64 32"
 NEXTAUTH_URL="http://localhost:3000"
-GEMINI_API_KEY="your-gemini-key"
+GROQ_API_KEY="your-groq-key"
 ```
 
 ### 5. Set up database
