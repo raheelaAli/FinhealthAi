@@ -24,18 +24,17 @@ you sleep under 6 hours").
 
 ---
 
-## Tech Stack (100% free)
+## Tech Stack 
 
-| Layer | Technology 
-|---|---|npm
-| Frontend + API | Next.js 14 App Router | 
-| Database | PostgreSQL via Neon | 
-| ORM | Prisma |
-| Auth | NextAuth.js |
-| AI | GROQ MOdel llama-3.1-8b-instant |
-| Styling | Tailwind CSS | 
-| Hosting | Vercel Hobby | 
 
+| Layer          | Technology                       |
+|----------------|---------------------------------|
+| Frontend + API | Next.js 14 App Router            |
+| Database       | PostgreSQL via Neon             |
+| ORM            | Prisma                          |
+| Auth           | NextAuth.js                     |
+| AI             | GROQ Model llama-3.1-8b-instant|
+| Styling        | Tailwind CSS                    |
 ---
 
 ## Getting Started

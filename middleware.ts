@@ -1,7 +1,3 @@
-// middleware.ts  (goes in project ROOT, not inside src/)
-// Protects /dashboard routes — redirects to login if not authenticated
-// Redirects already-logged-in users away from /auth pages to /dashboard
-
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
