@@ -1,17 +1,28 @@
 // src/app/page.tsx
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { Logo } from "@/components/logo";
 
-export default function LandingPage() {
+async function getPublishedPages() {
+  try {
+    return await prisma.cmsPage.findMany({
+      where: { published: true },
+      select: { title: true, slug: true },
+      orderBy: { title: "asc" },
+    });
+  } catch {
+    return [];
+  }
+}
+
+export default async function LandingPage() {
+  const cmsPages = await getPublishedPages();
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 flex flex-col">
       {/* Nav */}
-      <nav className="flex items-center justify-between px-8 py-5 max-w-6xl mx-auto">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">F</span>
-          </div>
-          <span className="font-bold text-gray-900">FinHealth AI</span>
-        </div>
+      <nav className="flex items-center justify-between px-8 py-5 max-w-6xl mx-auto w-full">
+        <Logo size="md" />
         <div className="flex items-center gap-4">
           <Link href="/auth/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
             Sign in
@@ -58,7 +69,7 @@ export default function LandingPage() {
       </div>
 
       {/* Feature cards */}
-      <div className="max-w-5xl mx-auto px-8 pb-24">
+      <div className="max-w-5xl mx-auto px-8 pb-16 w-full">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             {
@@ -104,6 +115,31 @@ export default function LandingPage() {
           </Link>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="mt-auto border-t border-gray-200 bg-white">
+        <div className="max-w-6xl mx-auto px-8 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <Logo size="sm" />
+          <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            {cmsPages.map(page => (
+              <Link
+                key={page.slug}
+                href={page.slug === "contact-us" ? "/contact" : `/pages/${page.slug}`}
+                className="text-sm text-gray-500 hover:text-emerald-600 transition-colors"
+              >
+                {page.title}
+              </Link>
+            ))}
+            {/* Always show Contact Us if not in CMS */}
+            {!cmsPages.some(p => p.slug === "contact-us") && (
+              <Link href="/contact" className="text-sm text-gray-500 hover:text-emerald-600 transition-colors">
+                Contact Us
+              </Link>
+            )}
+          </nav>
+          <p className="text-xs text-gray-400">© {new Date().getFullYear()} FinHealth AI</p>
+        </div>
+      </footer>
     </div>
   );
 }

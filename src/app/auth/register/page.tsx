@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -47,11 +48,10 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-100 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-emerald-600 rounded-2xl mb-4">
-            <span className="text-white text-2xl font-bold">F</span>
+          <div className="flex justify-center mb-4">
+            <Logo size="lg" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">FinHealth AI</h1>
-          <p className="text-gray-500 mt-1 text-sm">Start your free account today</p>
+          <p className="text-gray-500 mt-2 text-sm">Start your free account today</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8">

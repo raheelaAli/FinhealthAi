@@ -5,9 +5,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+ 
 }
-
 
 // ENUMS
 
@@ -188,3 +187,21 @@ model Alert {
 
   @@index([userId, read])
 }
+model CmsPage {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String   @unique
+  content   String   @db.Text
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdminSettings {
+  id           String   @id @default(cuid())
+  contactEmail String
+  updatedAt    DateTime @updatedAt
+}
+
+// Also ADD this to your User model:
+// usageLogs   UsageLog[]

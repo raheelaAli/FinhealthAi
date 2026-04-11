@@ -1,17 +1,25 @@
 // src/lib/prisma.ts
-// Singleton pattern prevents multiple Prisma Client instances in development
-// (Next.js hot reload would create a new instance on every file change otherwise)
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 
 const globalForPrisma = globalThis as unknown as {
+  pool:   pg.Pool      | undefined;
   prisma: PrismaClient | undefined;
 };
 
+const pool = globalForPrisma.pool ?? new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }, // required for Neon
+});
+
+if (process.env.NODE_ENV !== "production") globalForPrisma.pool = pool;
+
+const adapter = new PrismaPg(pool);
+
 export const prisma =
   globalForPrisma.prisma ??
-  new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
-  });
+  new PrismaClient({ adapter });
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
