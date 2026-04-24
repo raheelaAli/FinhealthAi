@@ -74,7 +74,7 @@ export function TransactionForm({ onSuccess }: Props) {
               form.type === t
                 ? t === TransactionType.EXPENSE
                   ? "bg-red-500 text-white"
-                  : "bg-emerald-500 text-white"
+                  : "bg-brand-500 text-white"
                 : "bg-white text-gray-500 hover:bg-gray-50"
             }`}
           >
@@ -96,7 +96,7 @@ export function TransactionForm({ onSuccess }: Props) {
           onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
           required
           placeholder="0"
-          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
         />
       </div>
 
@@ -106,7 +106,7 @@ export function TransactionForm({ onSuccess }: Props) {
         <select
           value={form.category}
           onChange={e => setForm(f => ({ ...f, category: e.target.value as Category }))}
-          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white"
+          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm bg-white"
         >
           {CATEGORIES.map(c => (
             <option key={c.value} value={c.value}>{c.label}</option>
@@ -122,7 +122,7 @@ export function TransactionForm({ onSuccess }: Props) {
           value={form.date}
           onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
           required
-          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
         />
       </div>
 
@@ -136,14 +136,14 @@ export function TransactionForm({ onSuccess }: Props) {
           value={form.note}
           onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
           placeholder="e.g. Grocery run, Petrol..."
-          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
         />
       </div>
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors text-sm"
+        className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors text-sm"
       >
         {loading ? "Saving..." : "Add transaction"}
       </button>

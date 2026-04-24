@@ -1,8 +1,14 @@
 // src/app/dashboard/page.tsx
+import type { Metadata } from "next";
 import { requireAuth } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
-import { TransactionType } from "@prisma/client";
+import { TransactionType } from "@/generated/prisma/client";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Overview",
+  description: "Your FinHealth AI dashboard — finance and health at a glance.",
+};
 
 async function getDashboardData(userId: string) {
   const now          = new Date();
@@ -17,17 +23,16 @@ async function getDashboardData(userId: string) {
     prisma.alert.count({ where: { userId, read: false } }),
   ]);
 
-  const income   = transactions.filter(t => t.type === TransactionType.INCOME).reduce((s, t) => s + t.amount, 0);
-  const expenses = transactions.filter(t => t.type === TransactionType.EXPENSE).reduce((s, t) => s + t.amount, 0);
-  const avgSteps = healthLogs.length ? Math.round(healthLogs.reduce((s, l) => s + (l.steps ?? 0), 0) / healthLogs.length) : 0;
-  const avgSleep = healthLogs.length ? (healthLogs.reduce((s, l) => s + (l.sleepHrs ?? 0), 0) / healthLogs.length).toFixed(1) : "0";
-  const avgMood  = healthLogs.length ? (healthLogs.reduce((s, l) => s + (l.mood ?? 0), 0) / healthLogs.length).toFixed(1) : "0";
+  const income   = transactions.filter(t => t.type === TransactionType.INCOME).reduce((s,t) => s + t.amount, 0);
+  const expenses = transactions.filter(t => t.type === TransactionType.EXPENSE).reduce((s,t) => s + t.amount, 0);
+  const avgSteps = healthLogs.length ? Math.round(healthLogs.reduce((s,l) => s + (l.steps ?? 0), 0) / healthLogs.length) : 0;
+  const avgSleep = healthLogs.length ? (healthLogs.reduce((s,l) => s + (l.sleepHrs ?? 0), 0) / healthLogs.length).toFixed(1) : "0";
+  const avgMood  = healthLogs.length ? (healthLogs.reduce((s,l) => s + (l.mood ?? 0), 0) / healthLogs.length).toFixed(1) : "0";
 
-  const byCategory: Record<string, number> = {};
+  const byCategory: Record<string,number> = {};
   transactions.filter(t => t.type === TransactionType.EXPENSE).forEach(t => {
     byCategory[t.category] = (byCategory[t.category] ?? 0) + t.amount;
   });
-
   const budgetUsage = budgets.map(b => ({
     category: b.category, limit: b.limit,
     spent: byCategory[b.category] ?? 0,
@@ -39,9 +44,9 @@ async function getDashboardData(userId: string) {
 
 function fmt(n: number) { return "₨" + n.toLocaleString("en-PK", { maximumFractionDigits: 0 }); }
 
-const categoryEmoji: Record<string, string> = {
-  FOOD: "🍔", TRANSPORT: "🚗", HOUSING: "🏠", HEALTH: "💊",
-  ENTERTAINMENT: "🎬", SHOPPING: "🛍️", EDUCATION: "📚", SAVINGS: "💰", OTHER: "📦",
+const categoryEmoji: Record<string,string> = {
+  FOOD:"🍔", TRANSPORT:"🚗", HOUSING:"🏠", HEALTH:"💊",
+  ENTERTAINMENT:"🎬", SHOPPING:"🛍️", EDUCATION:"📚", SAVINGS:"💰", OTHER:"📦",
 };
 
 export default async function DashboardPage() {
@@ -50,139 +55,156 @@ export default async function DashboardPage() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
+  const statCards = [
+    { label: "Income this month",   value: fmt(d.income),   color: "text-brand-700",  bg: "bg-brand-50  border-brand-200",  icon: "↑", iconBg: "bg-brand-100 text-brand-600" },
+    { label: "Expenses this month", value: fmt(d.expenses), color: "text-red-600",    bg: "bg-red-50    border-red-200",    icon: "↓", iconBg: "bg-red-100 text-red-500" },
+    { label: "Net savings",         value: fmt(d.savings),  color: d.savings >= 0 ? "text-brand-700" : "text-red-600", bg: d.savings >= 0 ? "bg-brand-50 border-brand-200" : "bg-red-50 border-red-200", icon: "₨", iconBg: d.savings >= 0 ? "bg-brand-100 text-brand-600" : "bg-red-100 text-red-500" },
+    { label: "Avg daily steps",     value: d.avgSteps.toLocaleString(), color: "text-blue-700",   bg: "bg-blue-50   border-blue-200",   icon: "👟", iconBg: "bg-blue-100 text-blue-600" },
+    { label: "Avg sleep (hrs)",     value: d.avgSleep,      color: "text-violet-700", bg: "bg-violet-50 border-violet-200", icon: "😴", iconBg: "bg-violet-100 text-violet-600" },
+    { label: "Avg mood score",      value: `${d.avgMood}/5`,color: "text-amber-700",  bg: "bg-amber-50  border-amber-200",  icon: "😊", iconBg: "bg-amber-100 text-amber-600" },
+  ];
+
   return (
     <div className="space-y-8">
+
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <header className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{greeting}, {user.name?.split(" ")[0]} 👋</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {greeting}, {user.name?.split(" ")[0]} 👋
+          </h1>
           <p className="text-gray-500 text-sm mt-1">Here's your FinHealth snapshot for this month</p>
         </div>
         {d.unreadAlerts > 0 && (
           <Link href="/dashboard/alerts"
-            className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-100 transition-colors">
-            <span>🔔</span> {d.unreadAlerts} new alert{d.unreadAlerts > 1 ? "s" : ""}
+            className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-amber-100 transition-colors shrink-0">
+            <span aria-hidden="true">🔔</span>
+            <span>{d.unreadAlerts} new alert{d.unreadAlerts > 1 ? "s" : ""}</span>
           </Link>
+        )}
+      </header>
+
+      {/* Stat cards */}
+      <section aria-label="Key metrics">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {statCards.map(c => (
+            <div key={c.label} className={`rounded-2xl border p-5 stat-card ${c.bg}`}>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{c.label}</p>
+                <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-sm ${c.iconBg}`}>{c.icon}</span>
+              </div>
+              <p className={`text-2xl font-bold ${c.color}`}>{c.value}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="grid md:grid-cols-2 gap-6">
+
+        {/* Budget overview */}
+        {d.budgetUsage.length > 0 && (
+          <section aria-labelledby="budget-heading">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-5">
+              <header className="flex items-center justify-between mb-5">
+                <h2 id="budget-heading" className="font-semibold text-gray-900">Budget overview</h2>
+                <Link href="/dashboard/finance" className="text-xs font-medium text-brand-600 hover:text-brand-700 transition-colors">Manage →</Link>
+              </header>
+              <ul className="space-y-4" role="list">
+                {d.budgetUsage.map(b => (
+                  <li key={b.category}>
+                    <div className="flex items-center justify-between text-sm mb-1.5">
+                      <span className="font-medium text-gray-700">{categoryEmoji[b.category]} {b.category}</span>
+                      <span className={`text-xs font-semibold ${b.pct >= 100 ? "text-red-600" : b.pct >= 80 ? "text-amber-600" : "text-gray-500"}`}>
+                        {fmt(b.spent)} / {fmt(b.limit)}
+                      </span>
+                    </div>
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden" role="progressbar" aria-valuenow={b.pct} aria-valuemin={0} aria-valuemax={100}>
+                      <div
+                        className={`h-full rounded-full transition-all duration-700 ${b.pct >= 100 ? "bg-red-500" : b.pct >= 80 ? "bg-amber-500" : "progress-bar"}`}
+                        style={{ width: `${b.pct}%` }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        )}
+
+        {/* Recent transactions */}
+        {d.recentTransactions.length > 0 && (
+          <section aria-labelledby="recent-tx-heading">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-5">
+              <header className="flex items-center justify-between mb-5">
+                <h2 id="recent-tx-heading" className="font-semibold text-gray-900">Recent transactions</h2>
+                <Link href="/dashboard/finance" className="text-xs font-medium text-brand-600 hover:text-brand-700 transition-colors">See all →</Link>
+              </header>
+              <ul className="space-y-3" role="list">
+                {d.recentTransactions.map(t => (
+                  <li key={t.id} className="flex items-center justify-between py-1">
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg" aria-hidden="true">{categoryEmoji[t.category] ?? "📦"}</span>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 leading-tight">{t.description || t.category}</p>
+                        <p className="text-xs text-gray-400">{new Date(t.date).toLocaleDateString("en-PK", { day:"numeric", month:"short" })}</p>
+                      </div>
+                    </div>
+                    <span className={`text-sm font-semibold ${t.type === TransactionType.INCOME ? "text-brand-600" : "text-red-500"}`}>
+                      {t.type === TransactionType.INCOME ? "+" : "-"}{fmt(t.amount)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
         )}
       </div>
 
-      {/* Stat grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {[
-          { label: "Income this month",   value: fmt(d.income),   color: "text-emerald-600" },
-          { label: "Expenses this month", value: fmt(d.expenses), color: "text-red-500"     },
-          { label: "Net savings",         value: fmt(d.savings),  color: d.savings >= 0 ? "text-emerald-600" : "text-red-500" },
-          { label: "Avg daily steps",     value: d.avgSteps.toLocaleString(), color: "text-blue-600"   },
-          { label: "Avg sleep (hrs)",     value: d.avgSleep,      color: "text-purple-600"  },
-          { label: "Avg mood",            value: `${d.avgMood}/5`,color: "text-amber-600"   },
-        ].map(c => (
-          <div key={c.label} className="bg-white rounded-xl border border-gray-200 p-5">
-            <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">{c.label}</p>
-            <p className={`text-2xl font-bold mt-1 ${c.color}`}>{c.value}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Budget usage */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900">Budget usage</h2>
-            <Link href="/dashboard/finance" className="text-xs text-emerald-600 hover:underline">View all →</Link>
-          </div>
-          <div className="space-y-3">
-            {d.budgetUsage.map(b => (
-              <div key={b.category}>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600">{categoryEmoji[b.category]} {b.category.charAt(0) + b.category.slice(1).toLowerCase()}</span>
-                  <span className={b.pct >= 90 ? "text-red-600 font-medium" : "text-gray-500"}>
-                    {fmt(b.spent)} / {fmt(b.limit)}
-                  </span>
-                </div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full transition-all ${b.pct >= 90 ? "bg-red-500" : b.pct >= 70 ? "bg-amber-500" : "bg-emerald-500"}`}
-                    style={{ width: `${b.pct}%` }} />
-                </div>
-              </div>
-            ))}
-            {d.budgetUsage.length === 0 && (
-              <p className="text-sm text-gray-400 text-center py-4">
-                No budgets set. <Link href="/dashboard/finance" className="text-emerald-600 hover:underline">Add one →</Link>
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Goals */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900">Goals</h2>
-            <Link href="/dashboard/goals" className="text-xs text-emerald-600 hover:underline">View all →</Link>
-          </div>
-          <div className="space-y-3">
-            {d.goals.map(g => {
-              const pct = Math.min(100, Math.round((g.current / g.target) * 100));
-              return (
-                <div key={g.id}>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600 flex items-center gap-1">
-                      {g.achieved && <span className="text-emerald-500">✓</span>} {g.title}
-                    </span>
-                    <span className="text-gray-500">{pct}%</span>
+      {/* Goals */}
+      {d.goals.length > 0 && (
+        <section aria-labelledby="goals-heading">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-5">
+            <header className="flex items-center justify-between mb-5">
+              <h2 id="goals-heading" className="font-semibold text-gray-900">Active goals</h2>
+              <Link href="/dashboard/goals" className="text-xs font-medium text-brand-600 hover:text-brand-700 transition-colors">All goals →</Link>
+            </header>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {d.goals.map(g => {
+                const pct = g.target > 0 ? Math.min(100, Math.round((g.current / g.target) * 100)) : 0;
+                return (
+                  <div key={g.id} className="p-4 bg-brand-50/50 border border-brand-100 rounded-xl">
+                    <p className="text-sm font-semibold text-gray-900 mb-1 truncate">{g.title}</p>
+                    <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+                      <span>{g.current.toLocaleString()} / {g.target.toLocaleString()}</span>
+                      <span className="font-semibold text-brand-600">{pct}%</span>
+                    </div>
+                    <div className="h-1.5 bg-brand-100 rounded-full overflow-hidden" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+                      <div className="progress-bar h-full" style={{ width: `${pct}%` }} />
+                    </div>
                   </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full ${g.achieved ? "bg-emerald-500" : "bg-blue-500"}`} style={{ width: `${pct}%` }} />
-                  </div>
-                </div>
-              );
-            })}
-            {d.goals.length === 0 && (
-              <p className="text-sm text-gray-400 text-center py-4">
-                No goals yet. <Link href="/dashboard/goals" className="text-emerald-600 hover:underline">Add one →</Link>
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Recent transactions */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-gray-900">Recent transactions</h2>
-          <Link href="/dashboard/finance" className="text-xs text-emerald-600 hover:underline">View all →</Link>
-        </div>
-        <div className="space-y-1">
-          {d.recentTransactions.map(t => (
-            <div key={t.id} className="flex items-center justify-between py-2.5 border-b border-gray-50 last:border-0">
-              <div className="flex items-center gap-3">
-                <span className="text-lg">{categoryEmoji[t.category]}</span>
-                <div>
-                  <p className="text-sm font-medium text-gray-800">{t.note ?? t.category}</p>
-                  <p className="text-xs text-gray-400">{new Date(t.date).toLocaleDateString("en-PK", { day: "numeric", month: "short" })}</p>
-                </div>
-              </div>
-              <span className={`text-sm font-semibold ${t.type === TransactionType.INCOME ? "text-emerald-600" : "text-gray-800"}`}>
-                {t.type === TransactionType.INCOME ? "+" : "−"}{fmt(t.amount)}
-              </span>
+                );
+              })}
             </div>
-          ))}
-          {d.recentTransactions.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-6">No transactions yet this month.</p>
-          )}
-        </div>
-      </div>
+          </div>
+        </section>
+      )}
 
       {/* AI CTA */}
-      <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl p-6 text-white">
-        <h2 className="font-semibold text-lg">✦ Get your AI insight</h2>
-        <p className="text-emerald-100 text-sm mt-1 mb-4">
-          Ask AI to analyze your finance + health data together and find hidden patterns.
-        </p>
-        <Link href="/dashboard/ai"
-          className="inline-block bg-white text-emerald-700 font-medium text-sm px-5 py-2 rounded-lg hover:bg-emerald-50 transition-colors">
-          Open AI advisor →
+      <section aria-labelledby="ai-cta-heading">
+        <Link href="/dashboard/ai" className="block group">
+          <div className="bg-gradient-to-r from-brand-600 to-teal-600 rounded-2xl p-6 flex items-center justify-between transition-opacity hover:opacity-95">
+            <div>
+              <h2 id="ai-cta-heading" className="font-bold text-white text-lg">Ask your AI advisor</h2>
+              <p className="text-brand-100 text-sm mt-0.5">Get personalized insights from your combined data</p>
+            </div>
+            <div className="w-11 h-11 bg-white/15 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-white/25 transition-colors">
+              <svg viewBox="0 0 20 20" fill="white" className="w-5 h-5" aria-hidden="true">
+                <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+              </svg>
+            </div>
+          </div>
         </Link>
-      </div>
+      </section>
     </div>
   );
 }

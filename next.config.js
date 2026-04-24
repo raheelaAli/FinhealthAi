@@ -1,8 +1,23 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Server Actions are stable in Next.js 15 — no experimental flag needed
-  // This tells Next.js to not bundle these packages on the server side
-  serverExternalPackages: ["@prisma/client", "bcryptjs"],
+  images: {
+    // Allow local /public images — add external domains here if needed
+    remotePatterns: [],
+  },
+  // Security headers
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options",        value: "DENY" },
+          { key: "X-XSS-Protection",       value: "1; mode=block" },
+          { key: "Referrer-Policy",        value: "strict-origin-when-cross-origin" },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

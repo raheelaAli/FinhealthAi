@@ -63,7 +63,7 @@ export function HealthLogForm({ onSuccess }: Props) {
         </div>
       )}
       {success && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-700">
+        <div className="p-3 bg-brand-50 border border-emerald-200 rounded-lg text-sm text-brand-700">
           ✓ Health log saved!
         </div>
       )}
@@ -75,7 +75,7 @@ export function HealthLogForm({ onSuccess }: Props) {
           value={form.date}
           onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
           required
-          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
         />
       </div>
 
@@ -86,7 +86,7 @@ export function HealthLogForm({ onSuccess }: Props) {
             type="number" min="0" value={form.steps}
             onChange={e => setForm(f => ({ ...f, steps: e.target.value }))}
             placeholder="e.g. 8000"
-            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
           />
         </div>
         <div>
@@ -95,7 +95,7 @@ export function HealthLogForm({ onSuccess }: Props) {
             type="number" min="0" max="24" step="0.5" value={form.sleepHrs}
             onChange={e => setForm(f => ({ ...f, sleepHrs: e.target.value }))}
             placeholder="e.g. 7.5"
-            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
           />
         </div>
         <div>
@@ -104,7 +104,7 @@ export function HealthLogForm({ onSuccess }: Props) {
             type="number" min="0" step="0.1" value={form.waterL}
             onChange={e => setForm(f => ({ ...f, waterL: e.target.value }))}
             placeholder="e.g. 2.0"
-            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
           />
         </div>
         <div>
@@ -113,7 +113,7 @@ export function HealthLogForm({ onSuccess }: Props) {
             type="number" min="0" step="0.1" value={form.weight}
             onChange={e => setForm(f => ({ ...f, weight: e.target.value }))}
             placeholder="e.g. 72.5"
-            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
           />
         </div>
       </div>
@@ -142,13 +142,13 @@ export function HealthLogForm({ onSuccess }: Props) {
           type="text" value={form.notes}
           onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
           placeholder="How are you feeling today?"
-          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
         />
       </div>
 
       <button
         type="submit" disabled={loading}
-        className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors text-sm"
+        className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors text-sm"
       >
         {loading ? "Saving..." : "Save today's log"}
       </button>

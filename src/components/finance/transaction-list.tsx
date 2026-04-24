@@ -55,7 +55,7 @@ export function TransactionList({ transactions, onDelete }: Props) {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className={`text-sm font-semibold ${t.type === "INCOME" ? "text-emerald-600" : "text-gray-800"}`}>
+            <span className={`text-sm font-semibold ${t.type === "INCOME" ? "text-brand-600" : "text-gray-800"}`}>
               {t.type === "INCOME" ? "+" : "−"}{fmt(t.amount)}
             </span>
             <button

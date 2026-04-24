@@ -76,7 +76,7 @@ export function BudgetManager({ budgetUsage, onUpdate }: Props) {
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 b.pct >= 100 ? "bg-red-500" :
-                b.pct >= 80  ? "bg-amber-500" : "bg-emerald-500"
+                b.pct >= 80  ? "bg-amber-500" : "bg-brand-500"
               }`}
               style={{ width: `${Math.min(b.pct, 100)}%` }}
             />
@@ -97,7 +97,7 @@ export function BudgetManager({ budgetUsage, onUpdate }: Props) {
           <select
             value={category}
             onChange={e => setCategory(e.target.value as Category)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-500"
           >
             {CATEGORIES.map(c => (
               <option key={c.value} value={c.value}>{c.label}</option>
@@ -110,13 +110,13 @@ export function BudgetManager({ budgetUsage, onUpdate }: Props) {
             onChange={e => setLimit(e.target.value)}
             required
             placeholder="Monthly limit (₨)"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-emerald-600 text-white text-sm py-2 rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+              className="flex-1 bg-brand-600 text-white text-sm py-2 rounded-lg hover:bg-brand-700 disabled:opacity-50 transition-colors"
             >
               {loading ? "Saving..." : "Save budget"}
             </button>
@@ -132,7 +132,7 @@ export function BudgetManager({ budgetUsage, onUpdate }: Props) {
       ) : (
         <button
           onClick={() => setShowForm(true)}
-          className="w-full mt-2 py-2 border-2 border-dashed border-gray-200 text-gray-400 text-sm rounded-xl hover:border-emerald-400 hover:text-emerald-600 transition-colors"
+          className="w-full mt-2 py-2 border-2 border-dashed border-gray-200 text-gray-400 text-sm rounded-xl hover:border-emerald-400 hover:text-brand-600 transition-colors"
         >
           + Set a budget
         </button>

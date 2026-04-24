@@ -1,3 +1,5 @@
+// import type { Metadata } from "next";
+// export const metadata: Metadata = { title: "Finance", description: "Track income, expenses and budgets with real-time alerts." };
 "use client";
 // src/app/dashboard/finance/page.tsx
 

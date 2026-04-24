@@ -1,66 +1,136 @@
-/* src/app/globals.css */
+/* src/app/globals.css — FinHealth AI Design System */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --primary: 158 64% 38%;       /* emerald-600 — FinHealth brand */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 158 64% 38%;
-    --radius: 0.5rem;
-  }
+    /* FinHealth Brand Palette — synced with tailwind.config.js */
+    --brand-50:  240 253 244;
+    --brand-100: 220 252 231;
+    --brand-600: 22 163 74;
+    --brand-700: 21 128 61;
+    --brand-800: 26 127 75;
+    --brand-900: 20 83 45;
+    --teal-600:  13 148 136;
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --primary: 158 64% 38%;
+    --background: 0 0% 100%;
+    --foreground: 158 30% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 158 30% 8%;
+    --primary: 142 72% 29%;        /* brand-600 #16a34a */
     --primary-foreground: 0 0% 100%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --secondary: 142 76% 97%;      /* brand-50 */
+    --secondary-foreground: 142 60% 15%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 14% 47%;
+    --accent: 172 66% 30%;         /* teal-600 */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 158 64% 38%;
+    --border: 142 20% 90%;
+    --input: 142 20% 90%;
+    --ring: 142 72% 29%;
+    --radius: 0.625rem;
   }
 }
 
 @layer base {
   * { @apply border-border; }
-  body { @apply bg-background text-foreground; }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  h1, h2, h3, h4, h5, h6 { @apply font-semibold tracking-tight; }
 }
 
-/* Smooth scrolling */
+/* ── Smooth Scroll ── */
 html { scroll-behavior: smooth; }
 
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 6px; }
+/* ── Custom Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+::-webkit-scrollbar-thumb { background: #bbf7d0; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #86efac; }
 
-/* AI streaming text animation */
+/* ── Brand gradient text ── */
+.text-brand-gradient {
+  background: linear-gradient(135deg, #16a34a 0%, #0d9488 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Glassmorphism card ── */
+.glass-card {
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(22,163,74,0.12);
+}
+
+/* ── Navigation active indicator ── */
+.nav-active {
+  position: relative;
+}
+.nav-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: linear-gradient(to bottom, #16a34a, #0d9488);
+  border-radius: 0 3px 3px 0;
+}
+
+/* ── Hero mesh background ── */
+.hero-mesh {
+  background:
+    radial-gradient(ellipse at 75% 45%, rgba(34,197,94,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse at 15% 85%, rgba(13,148,136,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 0%, rgba(22,163,74,0.05) 0%, transparent 40%),
+    #ffffff;
+}
+
+/* ── Stat card shimmer on hover ── */
+.stat-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(22,163,74,0.12);
+}
+
+/* ── Button brand ── */
+.btn-brand {
+  background: linear-gradient(135deg, #16a34a 0%, #0d9488 100%);
+  color: white;
+  transition: opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+.btn-brand:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(22,163,74,0.35);
+}
+.btn-brand:active { transform: translateY(0); opacity: 1; }
+
+/* ── Input focus ring ── */
+.input-brand:focus {
+  outline: none;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22,163,74,0.15);
+}
+
+/* ── Dashboard sidebar active pill ── */
+.sidebar-active {
+  background: linear-gradient(135deg, rgba(22,163,74,0.12) 0%, rgba(13,148,136,0.08) 100%);
+  color: #16a34a;
+  font-weight: 600;
+}
+
+/* ── AI streaming cursor ── */
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
@@ -68,10 +138,47 @@ html { scroll-behavior: smooth; }
 .cursor-blink::after {
   content: "▋";
   animation: blink 1s step-end infinite;
-  color: #059669;
+  color: #16a34a;
 }
 
-/* Geist font variable */
-.font-sans {
-  font-family: var(--font-geist), system-ui, sans-serif;
+/* ── Fade-up animation with stagger ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+.animate-fade-up { animation: fadeUp 0.5s ease both; }
+.animate-delay-100 { animation-delay: 0.1s; }
+.animate-delay-200 { animation-delay: 0.2s; }
+.animate-delay-300 { animation-delay: 0.3s; }
+.animate-delay-400 { animation-delay: 0.4s; }
+.animate-delay-500 { animation-delay: 0.5s; }
+
+/* ── Progress bar ── */
+.progress-bar {
+  background: linear-gradient(90deg, #16a34a 0%, #0d9488 100%);
+  border-radius: 99px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Badge ── */
+.badge-brand {
+  background: rgba(22,163,74,0.1);
+  color: #15803d;
+  border: 1px solid rgba(22,163,74,0.2);
+  border-radius: 99px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 2px 10px;
+}
+
+/* ── Admin dark sidebar ── */
+.admin-sidebar {
+  background: linear-gradient(180deg, #052e16 0%, #14532d 100%);
+}
+
+/* ── Table row hover ── */
+.table-row-hover:hover { background: rgba(22,163,74,0.04); }
+
+/* Geist font variable */
+.font-sans { font-family: var(--font-geist), system-ui, sans-serif; }

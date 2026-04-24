@@ -1,0 +1,16 @@
+// src/app/robots.ts
+import type { MetadataRoute } from "next";
+
+export default function robots(): MetadataRoute.Robots {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://finhealth.app";
+  return {
+    rules: [
+      {
+        userAgent: "*",
+        allow: ["/", "/auth/login", "/auth/register", "/contact", "/pages/"],
+        disallow: ["/dashboard/", "/admin/", "/api/"],
+      },
+    ],
+    sitemap: `${siteUrl}/sitemap.xml`,
+  };
+}
