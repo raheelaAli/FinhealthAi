@@ -2,8 +2,8 @@
 
 > AI-powered personal finance & health insights platform built with Next.js 14, Prisma, and GROQ.
 
-**Live Demo:** [finhealth-ai.vercel.app](https://finhealth-ai.vercel.app)
-**Demo login:** `demo@finhealth.app` / `Demo1234!`
+<!-- **Live Demo:** [finhealth-ai.vercel.app](https://finhealth-ai.vercel.app)
+**Demo login:** `demo@finhealth.app` / `Demo1234!` -->
 
 ---
 
