@@ -1,4 +1,5 @@
-# FinHealth AI 🌿
+# FinHealth AI 
+
 
 > AI-powered personal finance & health insights platform built with Next.js 14, Prisma, and GROQ.
 
@@ -9,10 +10,8 @@
 
 ## What it does
 
-Most people can't afford a financial advisor or health coach. FinHealth AI gives everyone
-personalized, AI-driven insights about their spending habits AND health data — and finds
-the hidden connections between the two (e.g. "You spend 40% more on food on days when
-you sleep under 6 hours").
+The idea behind this project was to combine finance and health data in one place and generate useful insights from both. For example, users can track spending, sleep, mood, water intake, and budgets, then get AI-generated observations based on their habits.
+
 
 ### Key Features
 - **Role-based auth** — User / Premium / Admin roles via NextAuth.js
@@ -88,13 +87,16 @@ Visit [http://localhost:3000](http://localhost:3000)
 
 ## Data Models
 
-```
-User ──< Transaction   (finance entries)
-User ──< HealthLog     (daily health metrics)
-User ──< Budget        (monthly spending limits by category)
-User ──< Goal          (health + finance goals with progress)
-User ──< AiInsight     (AI conversation history)
-User ──< Alert         (real-time notifications)
+## Database Models
+
+```txt
+User
+ ├── Transactions
+ ├── HealthLogs
+ ├── Budgets
+ ├── Goals
+ ├── AiInsights
+ └── Alerts
 ```
 
 ---
